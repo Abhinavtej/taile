@@ -2,9 +2,9 @@ sentence_transformers
 pinecone
 transformers
 flask
-pinecone-client
 dotenv
 numpy==1.23.5
-spacy==3.6.1
+spacy
+gunicorn
 thinc==8.1.10
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.6.0/en_core_web_sm-3.6.0.tar.gz

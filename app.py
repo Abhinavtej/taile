@@ -2,7 +2,7 @@ import os
 import time
 from flask import Flask, request, render_template, jsonify
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from pinecone import Pinecone, ServerlessSpec
+import pinecone
 import spacy
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
@@ -103,7 +103,7 @@ PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 if not PINECONE_API_KEY:
     raise ValueError("PINECONE_API_KEY not found in environment variables.")
 
-pc = Pinecone(api_key=PINECONE_API_KEY)
+pc = pinecone.Pinecone(api_key=PINECONE_API_KEY)
 index_name = "story-generator"
 
 # Ensure Pinecone index exists
@@ -113,7 +113,7 @@ if index_name not in pc.list_indexes().names():
         name=index_name,
         dimension=1024,
         metric="cosine",
-        spec=ServerlessSpec(cloud="aws", region="us-east-1"),
+        spec=pinecone.ServerlessSpec(cloud="aws", region="us-east-1"),
     )
     time.sleep(10)
 
@@ -138,4 +138,4 @@ def generate():
     return jsonify({"story": story})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    app.run(debug=True)
