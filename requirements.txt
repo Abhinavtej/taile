@@ -4,5 +4,7 @@ transformers
 flask
 pinecone-client
 dotenv
-spacy
+numpy==1.23.5
+spacy==3.6.1
+thinc==8.1.10
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.6.0/en_core_web_sm-3.6.0.tar.gz
