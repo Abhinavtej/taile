@@ -1,0 +1,8 @@
+sentence_transformers
+pinecone
+transformers
+flask
+pinecone-client
+dotenv
+spacy
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.6.0/en_core_web_sm-3.6.0.tar.gz

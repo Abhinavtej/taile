@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI Story Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<style>
+    .rotating {
+      display: inline-block;
+      animation: rotateEmoji 1s linear infinite;
+    }
+  
+    @keyframes rotateEmoji {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+</style>  
+<body class="bg-gray-100 flex justify-center items-center min-h-screen p-5">
+
+<div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-4xl h-[90vh] flex flex-col">
+    <div class="flex justify-between items-center border-b pb-2">
+        <h2 class="text-2xl font-bold text-gray-800">📝 AI Story Chat</h2>
+        <button id="newChatBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg text-sm">
+            Clear Chat
+        </button>
+    </div>
+    
+    <div class="flex flex-col gap-4 mt-4">
+        <input type="text" id="keywordInput" class="flex-1 min-w-[200px] p-3 border rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+               placeholder="Enter keywords (e.g., magic, adventure)">
+    
+        <div class="flex flex-wrap gap-4 mt-4">
+            <div class="relative w-full md:w-auto flex-1">
+                <select id="genreSelect" class="p-3 border rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none w-full pr-10">
+                    <option value="fiction">Fiction</option>
+                    <option value="fantasy">Fantasy</option>
+                    <option value="mystery">Mystery</option>
+                    <option value="sci-fi">Sci-Fi</option>
+                    <option value="drama">Drama</option>
+                    <option value="action">Action</option>
+                </select>
+                <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                    ▼
+                </div>
+            </div>  
+
+            <div class="relative w-full md:w-auto flex-1">
+                <select id="languageSelect" class="p-3 border rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none w-full pr-10">
+                    <option value="english">English</option>
+                    <option value="telugu">Telugu</option>
+                    <option value="hindi">Hindi</option>
+                    <option value="spanish">Spanish</option>
+                    <option value="french">French</option>
+                </select>
+                <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                    ▼
+                </div>
+            </div>
+        </div>            
+    </div>
+    
+    <div class="flex gap-4 mt-5">
+        <button id="generateBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-lg transition">
+            Generate Story 🚀
+        </button>
+        <button id="stopBtn" class="flex-1 bg-red-500 text-white font-bold py-3 rounded-lg text-lg hidden">
+            Stop Generating ⛔
+        </button>
+    </div>
+
+    <div id="chatBox" class="mt-4 p-5 bg-gray-50 rounded-lg shadow-md flex-1 overflow-y-auto max-h-[60vh]">
+        <h4 class="text-lg font-bold text-gray-700">📖 Chat History:</h4>
+        <div id="chatHistory" class="mt-2 text-gray-600 whitespace-pre-wrap"></div>
+    </div>
+</div>
+
+<script>
+    let abortController = null;
+    let typingStopped = false;
+
+    document.getElementById("generateBtn").addEventListener("click", async function () {
+        const input = document.getElementById("keywordInput").value.trim();
+        const genre = document.getElementById("genreSelect").value;
+        const language = document.getElementById("languageSelect").value;
+        const chatHistory = document.getElementById("chatHistory");
+        const stopBtn = document.getElementById("stopBtn");
+
+        if (!input) {
+            alert("⚠️ Please enter some keywords!");
+            return;
+        }
+
+        abortController = new AbortController();
+        typingStopped = false;
+        stopBtn.classList.remove("hidden");
+
+        chatHistory.innerHTML += `<p class='text-blue-600 font-bold mt-2'>You: ${input}</p>`;
+        chatHistory.innerHTML += `<p id='loadingIndicator' class='text-gray-500'>Generating story <span class='rotating'>⏳</span></p>`;
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+
+        try {
+            const response = await fetch("/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ keywords: input, genre, language }),
+                signal: abortController.signal
+            });
+
+            const data = await response.json();
+            document.getElementById("loadingIndicator").remove();
+            stopBtn.classList.add("hidden");
+
+            if (data.story) {
+                typeStory(data.story);
+            } else {
+                chatHistory.innerHTML += "<p class='text-red-600'>❌ Error generating story!</p>";
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            document.getElementById("loadingIndicator").remove();
+            chatHistory.innerHTML += "<p class='text-red-600'>⚠️ Story generation stopped.</p>";
+            stopBtn.classList.add("hidden");
+        }
+    });
+
+    document.getElementById("stopBtn").addEventListener("click", function () {
+        if (abortController) {
+            abortController.abort();
+            typingStopped = true;
+        }
+        document.getElementById("stopBtn").classList.add("hidden");
+    });
+
+    document.getElementById("newChatBtn").addEventListener("click", function () {
+        document.getElementById("chatHistory").innerHTML = "";
+    });
+
+    function typeStory(text) {
+        let i = 0;
+        const chatHistory = document.getElementById("chatHistory");
+        chatHistory.innerHTML += "<p class='text-green-600 font-bold'>AI:</p>";
+        
+        function type() {
+            if (typingStopped) return;
+            if (i < text.length) {
+                chatHistory.innerHTML += text.charAt(i);
+                i++;
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+                setTimeout(type, 20);
+            }
+        }
+        type();
+    }
+</script>
+
+</body>
+</html>
