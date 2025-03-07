@@ -78,27 +78,21 @@ def generate_story(user_input, genre, language):
     inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=1024)
     output_tokens = model.generate(**inputs, max_length=2048, do_sample=True, temperature=0.7)
     story = tokenizer.decode(output_tokens[0], skip_special_tokens=True)
-    upsert_story_vectors(str(hash(story)), story, genre, language)  # Store story in Pinecone
+    upsert_story_vectors(str(hash(story)), story, genre, language)
     return story
 
-# Flask App
 app = Flask(__name__)
 
-# Load environment variables
 load_dotenv()
 HF_TOKEN = os.getenv("HUGGINGFACE_API_KEY")
 
-# Load NLP model
 nlp = spacy.load("en_core_web_sm")
 
-# Load embedding model
 embed_model = SentenceTransformer("intfloat/multilingual-e5-large")
 
-# Load Hugging Face model
 tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct", token=HF_TOKEN)
 model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-3B-Instruct", token=HF_TOKEN)
 
-# Initialize Pinecone
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 if not PINECONE_API_KEY:
     raise ValueError("PINECONE_API_KEY not found in environment variables.")
@@ -106,7 +100,6 @@ if not PINECONE_API_KEY:
 pc = pinecone.Pinecone(api_key=PINECONE_API_KEY)
 index_name = "story-generator"
 
-# Ensure Pinecone index exists
 if index_name not in pc.list_indexes().names():
     print("Creating Pinecone index...")
     pc.create_index(
