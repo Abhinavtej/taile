@@ -3,7 +3,9 @@ import time
 from flask import Flask, request, render_template, jsonify
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import pinecone
-import spacy
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.tag import pos_tag
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 
@@ -50,8 +52,9 @@ def retrieve_relevant_data(keywords, genre, language):
 
 def generate_story(user_input, genre, language):
     """Generate a story using Llama-3.2 without pipeline."""
-    doc = nlp(user_input)
-    keywords = [token.text for token in doc if token.pos_ in ["NOUN", "PROPN", "ADJ"]]
+    tokens = word_tokenize(user_input)
+    tagged_words = pos_tag(tokens)
+    keywords = [word for word, tag in tagged_words if tag in ["NN", "NNS", "NNP", "NNPS", "JJ"]]
     context = retrieve_relevant_data(keywords, genre, language)
     
     prompt = f"""
@@ -85,8 +88,6 @@ app = Flask(__name__)
 
 load_dotenv()
 HF_TOKEN = os.getenv("HUGGINGFACE_API_KEY")
-
-nlp = spacy.load("en_core_web_sm")
 
 embed_model = SentenceTransformer("intfloat/multilingual-e5-large")
 
@@ -129,10 +130,6 @@ def generate():
     
     story = generate_story(user_input, genre, language)
     return jsonify({"story": story})
-
-@app.route('/health')
-def health_check():
-    return jsonify(status="healthy"), 200
 
 if __name__ == "__main__":
     app.run(port=8000 ,debug=True)
