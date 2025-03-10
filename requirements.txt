@@ -3,3 +3,4 @@ python-dotenv
 numpy
 nltk
 requests
+gunicorn

@@ -1,129 +1,142 @@
 <!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AI Story Chat</title>
+    <title>TAILE - A Story Chatbot</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        .glow {
+            border: 2px solid transparent;
+            transition: all 0.3s ease-in-out;
+        }
+        .glow:focus, .glow:hover {
+            border-color: #4ade80;
+            box-shadow: 0 0 10px #4ade80;
+        }
+        .rotating {
+            display: inline-block;
+            animation: rotateEmoji 1s linear infinite;
+        }
+        @keyframes rotateEmoji {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
-<style>
-    .rotating {
-      display: inline-block;
-      animation: rotateEmoji 1s linear infinite;
-    }
-  
-    @keyframes rotateEmoji {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-</style>  
-<body class="bg-gray-100 flex justify-center items-center min-h-screen p-5">
-
-<div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-4xl h-[90vh] flex flex-col">
-    <div class="flex justify-between items-center border-b pb-2">
-        <h2 class="text-2xl font-bold text-gray-800">📝 AI Story Chat</h2>
-        <button id="newChatBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg text-sm">
+<body class="flex justify-center items-center min-h-screen p-6">
+<div class="bg-gray-800 p-6 rounded-2xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col">
+    <div class="flex justify-between items-center border-b border-gray-600 pb-3">
+        <h2 class="text-3xl font-bold text-green-400">📝 TA<span class='text-gray-600'>i</span>LE - A Story Chatbot</h2>
+        <button id="newChatBtn" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-5 rounded-lg">
             Clear Chat
         </button>
     </div>
-    
-    <div class="flex flex-col gap-4 mt-4">
-        <input type="text" id="keywordInput" class="flex-1 min-w-[200px] p-3 border rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
-               placeholder="Enter keywords (e.g., magic, adventure)">
-    
-        <div class="flex flex-wrap gap-4 mt-4">
-            <div class="relative w-full md:w-auto flex-1">
-                <select id="genreSelect" class="p-3 border rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none w-full pr-10">
-                    <option value="fiction">Fiction</option>
-                    <option value="fantasy">Fantasy</option>
-                    <option value="mystery">Mystery</option>
-                    <option value="sci-fi">Sci-Fi</option>
-                    <option value="drama">Drama</option>
-                    <option value="action">Action</option>
-                    <option value="romance">Romance</option>
-                    <option value="horror">Horror</option>
-                    <option value="thriller">Thriller</option>
-                    <option value="comedy">Comedy</option>
-                    <option value="historical">Historical</option>
-                    <option value="adventure">Adventure</option>
-                    <option value="supernatural">Supernatural</option>
-                    <option value="dystopian">Dystopian</option>
-                    <option value="crime">Crime</option>
-                    <option value="noir">Noir</option>
-                    <option value="cyberpunk">Cyberpunk</option>
-                    <option value="steampunk">Steampunk</option>
-                    <option value="mythology">Mythology</option>
-                    <option value="western">Western</option>
-                    <option value="biography">Biography</option>
-                    <option value="documentary">Documentary</option>
-                    <option value="psychological">Psychological</option>
-                    <option value="war">War</option>
-                    <option value="sports">Sports</option>
-                    <option value="musical">Musical</option>
-                    <option value="anime">Anime</option>
-                    <option value="slice-of-life">Slice of Life</option>
-                    <option value="family">Family</option>
-                    <option value="science">Science</option>
-                    <option value="spiritual">Spiritual</option>
-                    <option value="political">Political</option>
-                </select>
-                <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                    ▼
-                </div>
-            </div>  
 
-            <div class="relative w-full md:w-auto flex-1">
-                <select id="languageSelect" class="p-3 border rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none w-full pr-10">
-                    <option value="english">English</option>
-                    <option value="telugu">Telugu</option>
-                    <option value="hindi">Hindi</option>
-                    <option value="spanish">Spanish</option>
-                    <option value="french">French</option>
-                </select>
-                <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                    ▼
-                </div>
-            </div>
-        </div>            
-    </div>
-    
-    <div class="flex gap-4 mt-5">
-        <button id="generateBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-lg transition">
-            Generate Story 🚀
-        </button>
-        <button id="stopBtn" class="flex-1 bg-red-500 text-white font-bold py-3 rounded-lg text-lg hidden">
-            Stop Generating ⛔
-        </button>
-    </div>
+    <div id="chatBox" class="mt-4 p-5 bg-gray-700 rounded-xl shadow-md flex-1 overflow-y-auto flex flex-col">
+        <h4 class="text-lg font-bold text-gray-300">📖 Chat</h4>
+        <div id="chatHistory" class="mt-2 p-2 text-white whitespace-pre-wrap flex-1 overflow-y-auto"></div>
 
-    <div id="chatBox" class="mt-4 p-5 bg-gray-50 rounded-lg shadow-md flex-1 overflow-y-auto max-h-[60vh]">
-        <h4 class="text-lg font-bold text-gray-700">📖 Chat History:</h4>
-        <div id="chatHistory" class="mt-2 text-gray-600 whitespace-pre-wrap"></div>
+        <div class="mt-4 p-4 bg-gray-900 border border-gray-700 rounded-xl shadow-md flex flex-col md:flex-row items-center gap-6">
+            <select id="genreSelect" class="w-full md:w-auto p-3 glow rounded-lg text-lg appearance-none bg-gray-800 text-white">
+                <option disabled selected value="">🎭 Genre</option>
+                <option value="fiction">Fiction</option>
+                <option value="fantasy">Fantasy</option>
+                <option value="mystery">Mystery</option>
+                <option value="sci-fi">Science Fiction</option>
+                <option value="drama">Drama</option>
+                <option value="action">Action</option>
+                <option value="romance">Romance</option>
+                <option value="horror">Horror</option>
+                <option value="thriller">Thriller</option>
+                <option value="comedy">Comedy</option>
+                <option value="historical">Historical</option>
+                <option value="adventure">Adventure</option>
+                <option value="crime">Crime</option>
+                <option value="dystopian">Dystopian</option>
+                <option value="mythology">Mythology</option>
+                <option value="psychological">Psychological</option>
+                <option value="supernatural">Supernatural</option>
+                <option value="war">War</option>
+                <option value="political">Political</option>
+            </select>
+
+            <select id="languageSelect" class="w-full md:w-auto p-3 glow rounded-lg text-lg appearance-none bg-gray-800 text-white">
+                <option disabled selected value="">🌍 Language</option>
+                <option value="english">English</option>
+                <option value="telugu">Telugu</option>
+                <option value="hindi">Hindi</option>
+                <option value="tamil">Tamil</option>
+                <option value="malayalam">Malayalam</option>
+                <option value="kannada">Kannada</option>
+                <option value="marathi">Marathi</option>
+                <option value="spanish">Spanish</option>
+                <option value="french">French</option>
+                <option value="german">German</option>
+            </select>
+            <input type="text" id="keywordInput" class="flex-1 p-3 glow rounded-lg text-lg bg-gray-800 text-white" placeholder="Enter keywords (e.g., magic, adventure)">
+            <button id="generateBtn" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg text-base transition">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 3l14 9-14 9V3z" />
+                </svg>
+            </button>
+            <button id="stopBtn" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg text-base transition hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h12v12H6z" />
+                </svg>
+            </button>            
+        </div>
     </div>
 </div>
-
 <script>
     let abortController = null;
     let typingStopped = false;
+    
+    const generateBtn = document.getElementById("generateBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const chatHistory = document.getElementById("chatHistory");
+    const userReplyInput = document.getElementById("keywordInput");
+    const genreSelect = document.getElementById("genreSelect");
+    const languageSelect = document.getElementById("languageSelect");
 
-    document.getElementById("generateBtn").addEventListener("click", async function () {
+    generateBtn.addEventListener("click", async function () {
         const input = document.getElementById("keywordInput").value.trim();
         const genre = document.getElementById("genreSelect").value;
         const language = document.getElementById("languageSelect").value;
-        const chatHistory = document.getElementById("chatHistory");
-        const stopBtn = document.getElementById("stopBtn");
 
         if (!input) {
             alert("⚠️ Please enter some keywords!");
             return;
         }
 
+        if (!genre) {
+            alert("⚠️ Please select a genre!");
+            return;
+        }
+
+        if (!language) {
+            alert("⚠️ Please select a language!");
+            return;
+        }
+
+        // Reset typing state
         abortController = new AbortController();
         typingStopped = false;
+
+        // Toggle buttons
+        generateBtn.classList.add("hidden");
         stopBtn.classList.remove("hidden");
 
-        chatHistory.innerHTML += `<p class='text-blue-600 font-bold mt-2'>You: ${input}</p>`;
-        chatHistory.innerHTML += `<p id='loadingIndicator' class='text-gray-500'>Generating story <span class='rotating'>⏳</span></p>`;
+        userReplyInput.value = "";
+        genreSelect.selectedIndex = 0;
+        languageSelect.selectedIndex = 0;
+
+        // Add user input to chat
+        chatHistory.innerHTML += `<p class='text-whitw font-bold mt-2'><svg class='inline-block w-6 h-6 fill-current text-blue-600' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 12c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5z'/></svg> ${input}</p>`;
+        chatHistory.innerHTML += `<p id='loadingIndicator' class='text-white mt-2'>Generating story <span class='rotating'>⏳</span></p>`;
         chatHistory.scrollTop = chatHistory.scrollHeight;
 
         try {
@@ -134,39 +147,44 @@
                 signal: abortController.signal
             });
 
+            if (!response.ok) throw new Error("Failed to fetch story");
+
             const data = await response.json();
             document.getElementById("loadingIndicator").remove();
-            stopBtn.classList.add("hidden");
 
             if (data.story) {
                 typeStory(data.story);
             } else {
-                chatHistory.innerHTML += "<p class='text-red-600'>❌ Error generating story!</p>";
+                chatHistory.innerHTML += "<p class='text-red-600 mt-2'>❌ Error generating story!</p>";
             }
         } catch (error) {
             console.error("Error:", error);
-            document.getElementById("loadingIndicator").remove();
-            chatHistory.innerHTML += "<p class='text-red-600'>⚠️ Story generation stopped.</p>";
+            if (!abortController.signal.aborted) {
+                document.getElementById("loadingIndicator").remove();
+                chatHistory.innerHTML += "<p class='text-red-600 mt-2'>⚠️ Story generation stopped.</p>";
+            }
             stopBtn.classList.add("hidden");
+            generateBtn.classList.remove("hidden");
         }
     });
 
-    document.getElementById("stopBtn").addEventListener("click", function () {
+    stopBtn.addEventListener("click", function () {
         if (abortController) {
             abortController.abort();
             typingStopped = true;
         }
-        document.getElementById("stopBtn").classList.add("hidden");
+        stopBtn.classList.add("hidden");
+        generateBtn.classList.remove("hidden");
     });
 
     document.getElementById("newChatBtn").addEventListener("click", function () {
-        document.getElementById("chatHistory").innerHTML = "";
+        chatHistory.innerHTML = "";
     });
 
     function typeStory(text) {
         let i = 0;
         const chatHistory = document.getElementById("chatHistory");
-        chatHistory.innerHTML += "<p class='text-green-600 font-bold'>AI:</p>";
+        chatHistory.innerHTML += `<p class='text-white mt-2 font-bold'><svg class='inline-block w-6 h-6 fill-current text-green-600' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm-6 4h12a4 4 0 0 1 4 4v5h1a1 1 0 1 1 0 2h-2v3a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-3H3a1 1 0 1 1 0-2h1V10a4 4 0 0 1 4-4zm-2 9h14v-5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v5zm3 3v2h10v-2H7zm2-6h2v2H9v-2zm6 0h2v2h-2v-2z'/></svg></p>`;
         
         function type() {
             if (typingStopped) return;
@@ -175,6 +193,9 @@
                 i++;
                 chatHistory.scrollTop = chatHistory.scrollHeight;
                 setTimeout(type, 20);
+            } else {
+                stopBtn.classList.add("hidden");
+                generateBtn.classList.remove("hidden");
             }
         }
         type();
