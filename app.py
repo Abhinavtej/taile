@@ -1,9 +1,12 @@
 import os
 from flask import Flask, request, render_template, jsonify
 import requests
+import nltk
 from nltk.tokenize import word_tokenize
 from nltk.tag import pos_tag
 from dotenv import load_dotenv
+
+nltk.data.path.append("nltk_data")
 
 def generate_story(user_input, genre, language):
     """Generate a story using Llama-3.2 without pipeline."""
